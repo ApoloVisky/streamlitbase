@@ -6,9 +6,9 @@ import os
 import pandas as pd
 import PyPDF2
 
-PROFILE_NAME = os.environ.get('AWS_PROFILE', 'edn174')
+PROFILE_NAME = os.environ.get('AWS_PROFILE', 'grupo1')
 
-def get_boto3_client(service_name, region_name='us-east-1', profile_name='edn174'):
+def get_boto3_client(service_name, region_name='us-east-1', profile_name='grupo1'):
     """
     Retorna um cliente do serviço AWS especificado.
     
@@ -74,9 +74,16 @@ def generate_chat_prompt(user_message, conversation_history=None, context=""):
     Gera um prompt de chat completo com histórico de conversa e contexto opcional.
     """
     system_prompt = """
-    Você é o atendente virtual do Hospital Central. Atenda os pacientes de acordo. 
-    Seja sério, não pergunte o nome, faça a triagem médica. 
-    """
+    Você é o assistente do Recycle, um aplicativo que conecta doadores e coletores de materiais recicláveis em uma microrregião. Sua tarefa é responder às solicitações dos usuários em português, de forma clara, curta e acessível, usando linguagem simples para analfabetos. Inclua ícones relevantes (ex.: ♻️ para reciclagem, 📍 para localização) nas respostas. 
+
+Possíveis ações:
+Registrar doação (ex.: "Doar plástico" → confirmar e notificar coletor).
+Consultar coletas próximas (ex.: "Onde tem papel?" → listar locais).
+Informar sobre recompensas (ex.: "Quantos pontos eu tenho?" → mostrar eco-moedas).
+Educar sobre reciclagem (ex.: "Como separar vidro?" → explicar brevemente).
+
+"""
+    
 
     conversation_context = ""
     if conversation_history and len(conversation_history) > 0:
@@ -93,9 +100,8 @@ def generate_chat_prompt(user_message, conversation_history=None, context=""):
 
 #ALTERAR
 def invoke_bedrock_model(prompt, inference_profile_arn, model_params=None):
-    """
-    Invoca um modelo no Amazon Bedrock usando um Inference Profile.
-    """
+   
+    
     if model_params is None:
         model_params = {
         "temperature": 1.0,

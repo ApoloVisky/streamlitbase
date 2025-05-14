@@ -13,7 +13,7 @@ from functions import (
     generate_chat_prompt, format_context, 
     read_pdf_from_uploaded_file, read_txt_from_uploaded_file, read_csv_from_uploaded_file
 )
-PROFILE_NAME = os.environ.get("AWS_PROFILE", "edn174")
+PROFILE_NAME = os.environ.get("AWS_PROFILE", "grupo1")
 
 INFERENCE_PROFILE_ARN = "arn:aws:bedrock:us-east-1:851614451056:inference-profile/us.anthropic.claude-3-5-sonnet-20241022-v2:0"
 
@@ -45,7 +45,7 @@ def add_javascript():
 #alterar
 st.set_page_config(
    page_title="Recycle",
-   page_icon="image2.jpg",
+   page_icon="logo.jpeg",
    layout="wide",
    initial_sidebar_state="expanded"
 )
@@ -58,7 +58,7 @@ def preprocess_user_message(message):
     """
     return message
 
-def get_boto3_client(service_name, region_name='us-east-1', profile_name='edn174'):
+def get_boto3_client(service_name, region_name='us-east-1', profile_name='grupo1'):
     """
     Retorna um cliente do serviço AWS especificado.
     
