@@ -13,8 +13,8 @@ from functions import (
     generate_chat_prompt, format_context, 
     read_pdf_from_uploaded_file, read_txt_from_uploaded_file, read_csv_from_uploaded_file
 )
-PROFILE_NAME = os.environ.get("AWS_PROFILE", "grupo1")
 
+PROFILE_NAME = os.environ.get("AWS_PROFILE", "grupo1")
 INFERENCE_PROFILE_ARN = "arn:aws:bedrock:us-east-1:851614451056:inference-profile/us.anthropic.claude-3-5-sonnet-20241022-v2:0"
 
 def add_javascript():
@@ -36,18 +36,45 @@ def add_javascript():
                     }
                 });
             }
+            
+            // Mostrar o nome do arquivo quando for anexado
+            const fileUploader = document.querySelector('.stFileUploader');
+            if (fileUploader) {
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'childList' && mutation.addedNodes.length) {
+                            const fileInfo = fileUploader.querySelector('.uploadedFileName');
+                            if (fileInfo) {
+                                const fileName = fileInfo.textContent.trim();
+                                // Adicionando uma mensagem ao lado do input
+                                const inputContainer = document.querySelector('.input-container');
+                                let fileStatus = document.querySelector('.file-attached');
+                                
+                                if (!fileStatus) {
+                                    fileStatus = document.createElement('div');
+                                    fileStatus.className = 'file-attached';
+                                    inputContainer.insertBefore(fileStatus, inputContainer.firstChild);
+                                }
+                                
+                                fileStatus.innerHTML = '<i class="fas fa-paperclip"></i> ' + fileName;
+                            }
+                        }
+                    });
+                });
+                
+                observer.observe(fileUploader, { childList: true, subtree: true });
+            }
         }, 1000); // Pequeno atraso para garantir que os elementos foram carregados
     });
     </script>
     """
     st.components.v1.html(js_code, height=0)
 
-#alterar
 st.set_page_config(
-   page_title="Recycle",
-   page_icon="logo.jpeg",
-   layout="wide",
-   initial_sidebar_state="expanded"
+    page_title="Recycle",
+    page_icon="logo.jpeg",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
 logo_path = "logo.jpeg"
@@ -90,7 +117,6 @@ def query_bedrock(message, session_id="", model_params=None, context=""):
     """
     Envia uma mensagem para o Amazon Bedrock com parâmetros de modelo específicos.
     """
-    #ALTERAR
     if model_params is None:
         model_params = {
             "temperature": 1.0,
@@ -131,11 +157,11 @@ def query_bedrock(message, session_id="", model_params=None, context=""):
         })
         
         response = bedrock_runtime.invoke_model(
-        modelId=INFERENCE_PROFILE_ARN,
-        body=body,
-        contentType="application/json",
-        accept="application/json"
-    )
+            modelId=INFERENCE_PROFILE_ARN,
+            body=body,
+            contentType="application/json",
+            accept="application/json"
+        )
         
         response_body = json.loads(response['body'].read())
         answer = response_body['content'][0]['text']
@@ -157,13 +183,14 @@ def query_bedrock(message, session_id="", model_params=None, context=""):
 
 def check_password():
     """Returns `True` if the user had the correct password."""
-
     def password_entered():
         """Checks whether a password entered by the user is correct."""
         print(f"DEBUG LOGIN: Tentativa de login - Usuário: '{st.session_state['username']}', Senha: '{st.session_state['password']}'")
         
+        if hmac$', Senha: '{st.session_state['password']}'")
+        
         if hmac.compare_digest(st.session_state["username"].strip(), "admin") and \
-        hmac.compare_digest(st.session_state["password"].strip(), "admin123"):
+           hmac.compare_digest(st.session_state["password"].strip(), "admin123"):
             print("DEBUG LOGIN: Autenticação bem-sucedida")
             st.session_state["password_correct"] = True
             st.session_state["auth_cookie"] = {
@@ -376,64 +403,10 @@ def handle_message():
                 if 'file_uploader_key' not in st.session_state:
                     st.session_state.file_uploader_key = "file_to_send_0"
 
-
             st.rerun()
 
         else:
             st.session_state.user_input = ""
-
-def add_javascript():
-    """Adiciona JavaScript para melhorar a interação do usuário com o chat"""
-    js_code = """
-    <script>
-    // Fazer com que a tecla Enter submeta o formulário
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(function() {
-            const textarea = document.querySelector('textarea');
-            if (textarea) {
-                textarea.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        const sendButton = document.querySelector('button[data-testid="baseButton-secondary"]');
-                        if (sendButton) {
-                            sendButton.click();
-                        }
-                    }
-                });
-            }
-            
-            // Mostrar o nome do arquivo quando for anexado
-            const fileUploader = document.querySelector('.stFileUploader');
-            if (fileUploader) {
-                const observer = new MutationObserver(function(mutations) {
-                    mutations.forEach(function(mutation) {
-                        if (mutation.type === 'childList' && mutation.addedNodes.length) {
-                            const fileInfo = fileUploader.querySelector('.uploadedFileName');
-                            if (fileInfo) {
-                                const fileName = fileInfo.textContent.trim();
-                                // Adicionando uma mensagem ao lado do input
-                                const inputContainer = document.querySelector('.input-container');
-                                let fileStatus = document.querySelector('.file-attached');
-                                
-                                if (!fileStatus) {
-                                    fileStatus = document.createElement('div');
-                                    fileStatus.className = 'file-attached';
-                                    inputContainer.insertBefore(fileStatus, inputContainer.firstChild);
-                                }
-                                
-                                fileStatus.innerHTML = '<i class="fas fa-paperclip"></i> ' + fileName;
-                            }
-                        }
-                    });
-                });
-                
-                observer.observe(fileUploader, { childList: true, subtree: true });
-            }
-        }, 1000); // Pequeno atraso para garantir que os elementos foram carregados
-    });
-    </script>
-    """
-    st.components.v1.html(js_code, height=0)
 
 def extract_title_from_response(response_text):
     """
@@ -953,8 +926,19 @@ if check_password():
                 )
             st.divider()
 
-            if st.button("Logout", use_container_width=True):
-                logout()
+        if st.button("Logout", use_container_width=True):
+            logout()
+
+        st.divider()
+        st.markdown("### Configurações")
+        model_options = ["Claude 3.5 Sonnet", "Claude 3 Opus", "Texto Direto", "Arquivo"]
+        selected_model = st.selectbox(
+            "Selecionar Modelo/Contexto",
+            options=model_options,
+            index=0,
+            key="selected_model"
+        )
+        st.session_state.selected_model = selected_model
 
     main_col1, main_col2, main_col3 = st.columns([1, 10, 1])
     
@@ -982,8 +966,6 @@ if check_password():
         
         st.markdown('<div class="input-container">', unsafe_allow_html=True)
         
-        st.markdown('<div class="input-container">', unsafe_allow_html=True)
-
         col1, col2, col3 = st.columns([5, 1, 1])
 
         with col1:
