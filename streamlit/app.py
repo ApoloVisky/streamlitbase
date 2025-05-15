@@ -15,7 +15,7 @@ from functions import (
 )
 
 # Configurações iniciais
-PROFILE_NAME = os.environ.get("AWS_PROFILE", "grupo1")
+PROFILE_NAME = os.environ.get("AWS_PROFILE", "")
 INFERENCE_PROFILE_ARN = "arn:aws:bedrock:us-east-1:851614451056:inference-profile/us.anthropic.claude-3-5-sonnet-20241022-v2:0"
 
 # Inicialização da sessão
@@ -75,7 +75,7 @@ def check_password():
     
     return False
 
-def get_boto3_client(service_name, region_name='us-east-1', profile_name='grupo1'):
+def get_boto3_client(service_name, region_name='us-east-1', profile_name=''):
     """Retorna um cliente do serviço AWS especificado"""
     try:
         session = boto3.Session(profile_name=profile_name, region_name=region_name)
