@@ -29,6 +29,21 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Exemplo: aumentar o tamanho da imagem do logo na sidebar
+# Basta ajustar o parâmetro width do st.image
+# Por exemplo, para 120 pixels:
+# st.image(logo_path, width=120)
+
+# Se quiser controlar via CSS para outros usos:
+st.markdown("""
+    <style>
+    .sidebar-content img {
+        max-width: 250px !important;
+        height: auto !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 logo_path = "logo.jpeg"
 
 def add_javascript():

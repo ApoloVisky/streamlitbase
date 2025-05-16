@@ -63,7 +63,6 @@ def generate_chat_prompt(user_message, conversation_history=None, context=""):
     Gera um prompt de chat completo com histórico de conversa e contexto opcional.
     """
     system_prompt = """
-
 🟢 Prompt para IA assistente do Recycle
 Você é o assistente virtual do Recycle, um aplicativo que conecta doadores e coletores de materiais recicláveis em uma microrregião.
 Sua missão é ajudar os usuários (inclusive analfabetos ou com baixa escolaridade) a usar o app com facilidade.
