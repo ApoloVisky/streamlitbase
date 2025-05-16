@@ -76,19 +76,21 @@ def check_password():
     return False
 
 def get_boto3_client(service_name, region_name='us-east-1', profile_name=''):
-    """Retorna um cliente do serviço AWS especificado"""
+    """
+    Retorna um cliente do serviço AWS usando IAM Role da instância.
+    """
     try:
-        session = boto3.Session(profile_name=profile_name, region_name=region_name)
+        # Primeiro tenta usar o IAM Role (modo de produção)
+        session = boto3.Session(region_name=region_name)
         client = session.client(service_name)
+        
+        print(f"DEBUG: Usando IAM Role para acessar '{service_name}' na região '{region_name}'")
         return client
+        
     except Exception as e:
-        print(f"Erro ao criar cliente boto3: {str(e)}")
-        try:
-            session = boto3.Session(region_name=region_name)
-            return session.client(service_name)
-        except Exception as e:
-            print(f"Falha ao usar IAM role: {str(e)}")
-            return None
+        print(f"ERRO: Não foi possível acessar a AWS: {str(e)}")
+        print("ATENÇÃO: Verifique se o IAM Role está corretamente associado à instância EC2.")
+        return None
 
 def query_bedrock(message, session_id="", model_params=None, context="", conversation_history=None):
     """Envia uma mensagem para o Amazon Bedrock"""

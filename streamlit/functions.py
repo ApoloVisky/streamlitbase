@@ -6,35 +6,24 @@ import os
 import pandas as pd
 import PyPDF2
 
-PROFILE_NAME = os.environ.get('AWS_PROFILE', 'grupo1')
+PROFILE_NAME = os.environ.get('AWS_PROFILE', '')
 
-def get_boto3_client(service_name, region_name='us-east-1', profile_name='grupo1'):
+def get_boto3_client(service_name, region_name='us-east-1', profile_name=''):
     """
-    Retorna um cliente do serviço AWS especificado.
-    
-    Tenta usar o perfil especificado para desenvolvimento local primeiro.
-    Se falhar, assume que está em uma instância EC2 e usa as credenciais do IAM role.
+    Retorna um cliente do serviço AWS usando IAM Role da instância.
     """
     try:
-        session = boto3.Session(profile_name=profile_name, region_name=region_name)
+        # Primeiro tenta usar o IAM Role (modo de produção)
+        session = boto3.Session(region_name=region_name)
         client = session.client(service_name)
-        if service_name == 'sts':
-            caller_identity = client.get_caller_identity()
-            print(f"DEBUG: Caller Identity: {caller_identity}")
-        print(f"DEBUG: Using profile '{profile_name}' in region '{region_name}' for service '{service_name}'")
+        
+        print(f"DEBUG: Usando IAM Role para acessar '{service_name}' na região '{region_name}'")
         return client
+        
     except Exception as e:
-        print(f"INFO: Não foi possível usar o perfil local '{profile_name}', tentando credenciais do IAM role: {str(e)}")
-        try:
-            session = boto3.Session(region_name=region_name)
-            client = session.client(service_name)
-            caller_identity = client.get_caller_identity()
-            print(f"DEBUG: Caller Identity (IAM Role): {caller_identity}")
-            print(f"DEBUG: Using IAM role in region '{region_name}' for service '{service_name}'")
-            return client
-        except Exception as e:
-            print(f"ERRO: Falha ao criar cliente boto3: {str(e)}")
-            return None
+        print(f"ERRO: Não foi possível acessar a AWS: {str(e)}")
+        print("ATENÇÃO: Verifique se o IAM Role está corretamente associado à instância EC2.")
+        return None
 
 def read_pdf(file_path):
     """Lê o conteúdo de um arquivo PDF e retorna como string."""
