@@ -34,25 +34,30 @@ st.set_page_config(
 logo_path = "logo.jpeg"
 
 def add_javascript():
-    """Adiciona JavaScript para melhorar a interação do usuário com o chat"""
+    """JavaScript robusto para enviar com Enter que funciona com recarregamentos do Streamlit"""
     js_code = """
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(function() {
-            const textarea = document.querySelector('textarea');
-            if (textarea) {
-                textarea.addEventListener('keydown', function(e) {
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        const sendButton = document.querySelector('button[data-testid="baseButton-secondary"]');
-                        if (sendButton) {
-                            sendButton.click();
-                        }
-                    }
-                });
+    const handleEnter = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            // Encontra o último botão secundário (normalmente o de enviar)
+            const sendButtons = document.querySelectorAll('button[kind="secondary"]');
+            if (sendButtons.length > 0) {
+                sendButtons[sendButtons.length-1].click();
             }
-        }, 1000);
+        }
+    };
+
+    // Observa mudanças no DOM para reconectar o listener
+    const observer = new MutationObserver((mutations) => {
+        const textArea = document.querySelector('textarea[aria-label="Mensagem"]');
+        if (textArea && !textArea._enterListenerAttached) {
+            textArea.addEventListener('keydown', handleEnter);
+            textArea._enterListenerAttached = true;
+        }
     });
+
+    observer.observe(document.body, { childList: true, subtree: true });
     </script>
     """
     st.components.v1.html(js_code, height=0)
@@ -200,14 +205,18 @@ def handle_message():
     """Processa o envio de uma mensagem do usuário"""
     if st.session_state.user_input.strip():
         user_message = st.session_state.user_input.strip()
-        timestamp = datetime.now().strftime("%H:%M")
-        
-        st.session_state.messages.append({"role": "user", "content": user_message, "time": timestamp})
-        
-        with st.chat_message("assistant", avatar=logo_path):
+        timestamp = datetime.now().strftime("%H:%M")  
+
+        st.session_state.messages.append({
+            "role": "user",  
+            "content": user_message,
+            "time": timestamp
+        })
+
+        with st.chat_message("assistant", avatar=logo_path): 
             typing_placeholder = st.empty()
-            typing_placeholder.markdown("_Digitando..._")
-            
+            typing_placeholder.markdown("_Digitando..._")  
+
             with st.spinner():
                 rag_context = get_rag_context()
                 result = query_bedrock(
@@ -216,19 +225,20 @@ def handle_message():
                     context=rag_context,
                     conversation_history=st.session_state.messages
                 )
-            
+
             if result:
                 assistant_message = result['answer']
                 st.session_state.session_id = result['sessionId']
-                
                 st.session_state.messages.append({
-                    "role": "assistant", 
-                    "content": assistant_message, 
+                    "role": "assistant",
+                    "content": assistant_message,
                     "time": datetime.now().strftime("%H:%M")
                 })
             
             typing_placeholder.empty()
-        
+            st.session_state.text_area_key = str(uuid.uuid4())
+            st.write(assistant_message)
+    
         st.rerun()
 
 def create_new_chat():
@@ -361,12 +371,24 @@ if check_password():
         
         # Área de entrada de mensagens
         st.markdown('<div class="input-container">', unsafe_allow_html=True)
-        user_input = st.text_area("Mensagem", placeholder="Digite sua mensagem aqui...", key="user_input", height=70, label_visibility="collapsed")
+        user_input = st.text_area(
+                "Mensagem", 
+                value=" ",  
+                placeholder="Digite sua mensagem aqui...", 
+                key=st.session_state.get('text_area_key', 'user_input'), 
+                height=70, 
+                label_visibility="collapsed"
+)
         
         col1, col2 = st.columns([6, 1])
         with col2:
-            if st.button("Enviar", key="send_button", use_container_width=True):
+            if st.button("Enviar", key="send_button", type="secondary", use_container_width=True):
                 if user_input.strip():
                     handle_message()
-        
-        st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown("""
+                    <style>
+                        textarea[aria-label="Mensagem"] {
+                        resize: none !important;
+                        }
+                        </style>
+                            """, unsafe_allow_html=True)
