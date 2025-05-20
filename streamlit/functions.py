@@ -182,7 +182,7 @@ Ex.: "Quero doar plástico" ou "Quero agendar coleta".
     conversation_context = ""
     if conversation_history and len(conversation_history) > 0:
       conversation_context = "Histórico da conversa:\n"
-      recent_messages = conversation_history[-8:]  # Limitamos a 8 mensagens recentes para evitar tokens excessivos
+      recent_messages = conversation_history[-15:]  # Limitamos a 8 mensagens recentes para evitar tokens excessivos
       for message in recent_messages:
         role = "Usuário" if message.get('role') == 'user' else "Assistente"
         conversation_context += f"{role}: {message.get('content')}\n"
